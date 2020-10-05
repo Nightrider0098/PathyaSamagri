@@ -1,0 +1,88 @@
+.user-detail-container {
+    margin: 10%;
+    display: block;
+    border: 2px solid black;
+    border-radius: 20px;
+    text-align: center;
+    padding: 25px 35px;
+    border-radius: 10px;
+    transition: all 300ms linear 0s;
+    background: #fff;
+    margin-bottom: 30px;
+    margin-top: 167px;
+}
+
+.user-text-details {
+    width: 56%;
+    margin: auto;
+    margin-left: 10px;
+    padding: 10px;
+}
+
+.user-detail-flex {
+    display: flex;
+    width: 100%;
+}
+
+.profile-keys {
+    font-size: 20px;
+    float: left;
+    /* display: block; */
+    word-wrap: break-word;
+    margin: 2px;
+    width: 50%;
+    text-align: left;
+}
+
+.profile-values {
+    /* display:block; */
+    float: right;
+    font-size: 15px;
+    text-align: left;
+    word-wrap: break-word;
+    margin: 2px;
+    width: 50%;
+}
+
+#noti-tab {
+    padding: 12px 58px;
+}
+
+.indv-detail {
+    display: flex;
+    width: 100%;
+}
+
+.noti-indiv {
+    border: 2px solid black;
+    box-sizing: border-box;
+    width: 95%;
+    height: 75px;
+    padding: 2px 1% 2px 3%;
+    display: block;
+    background-color: white;
+    color: #000000;
+    margin: 2px auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, .05);
+}
+
+.text-noti-indiv {
+    text-align: left;
+    float: left;
+    clear: both;
+    width: 90%;
+}
+
+.close-link {
+    float: right;
+    margin: auto 0;
+}
+
+.noti-container {
+    margin: 0 auto 15px auto;
+    height: 300px;
+    width: 85%;
+    overflow: scroll;
+    overflow-x: hidden;
+}

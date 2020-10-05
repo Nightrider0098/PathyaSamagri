@@ -1,0 +1,35 @@
+.footer-container{
+
+    margin: 0px 0 0 0;
+    display: block;
+    padding: 25px 0% 25px 50px;
+    background-color: black;
+    flex-wrap: wrap;
+}
+
+.footer-col-3{
+    display: block;
+    margin:auto;
+    width:30%;
+    min-width: 245px;
+}
+
+.follow-heading{
+
+    color: white;
+     margin-bottom: 11px;
+      width:100%; 
+      text-align:center;
+}
+.footer-special{
+border-radius: 0 !important;
+margin-left: 0!important;
+min-width: 100%;
+}
+@media screen and (max-width: 1200px)
+{
+.footer-special{
+    width: calc( 100% );
+}
+
+}

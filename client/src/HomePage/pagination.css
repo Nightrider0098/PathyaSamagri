@@ -1,0 +1,44 @@
+.pagination {
+    height: 80px;
+    margin: 18px 0;
+    color: #6c58bF;
+}
+
+.pagination > li > a
+{
+    background-color: white;
+    color: #5A4181;
+}
+
+.pagination > .active > a
+{
+    color: white;
+    background-color: #5A4181 !Important;
+    border: solid 1px #5A4181 !Important;
+}
+
+
+
+.pagination > li > a:hover 
+{
+    color: white;
+    background-color: rgb(33, 17, 58) !Important;
+
+}
+
+
+ .pagination > li > .page-mover:hover{ 
+    background-color: rgb(33, 17, 58) !Important;
+    /* color:white; */
+    border-color: rgb(211, 208, 208);
+
+}  
+
+.pagination > li > .page-mover:hover> ::before{
+color:white
+} 
+
+
+.pagination > li > .page-mover:hover> i {
+    background-color: rgb(33, 17, 58) !Important;
+    } 
