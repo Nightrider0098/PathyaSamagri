@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import IndividualCard from '../IndividualCard/IndividualCard'
 import EmptyCard from '../EmptyCard/EmptyCard'
+import { CardDeck } from 'react-bootstrap'
 class CardHolder extends Component {
 
     card_generator(dataList) {
@@ -14,9 +15,12 @@ class CardHolder extends Component {
     }
     render() {
         return (
-            <div className="card-deck m-auto" style={{ width: "95%" }}>
-                {this.card_generator(this.props.bookList)}
-            </div>
+            <div className="p-5">
+                <h2 style={{ textAlign: 'center', backgroundColor: 'white', padding: '5px', borderRadius: '5px' }}> Books and Stationary</h2>
+                <div className="d-flex w-100 flex-wrap " style={{ justifyContent: "center" }}>
+                    {this.card_generator(this.props.bookList)}
+                </div>
+            </div >
         )
     }
 }

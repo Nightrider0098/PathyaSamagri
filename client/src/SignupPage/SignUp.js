@@ -1,6 +1,10 @@
 import React, { Component } from 'react'
-import './styles.css'
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFacebook, faGoogle } from "@fortawesome/free-brands-svg-icons"
+import image from '../LoginPage/signin-image1.jpg';
+import './modal.css'
+import { Modal, Button, Form, Spinner } from 'react-bootstrap'
 class SignupPage extends Component {
     constructor(props) {
         super(props)
@@ -24,17 +28,17 @@ class SignupPage extends Component {
     }
 
     newUserNameHandler(value) {
-        this.setState({ newUserName: value })
+        this.setState({ newUserName: value.target.value })
     }
 
     newEmailHandler(value) {
-        this.setState({ newEmail: value })
+        this.setState({ newEmail: value.target.value })
     }
     newPasswordHandler(value) {
-        this.setState({ newPassword: value })
+        this.setState({ newPassword: value.target.value })
     }
     newRePassHandler(value) {
-        this.setState({ newRePass: value })
+        this.setState({ newRePass: value.target.value })
         if (value === this.state.newPassword) {
             this.setState({ Validated: true })
         }
@@ -58,14 +62,24 @@ class SignupPage extends Component {
                 },
                 body: JSON.stringify(AllDetails)
             }
-            fetch( '/api/Signup', option).then(ret => { return ret.json() }).then(ret => {
-                if (ret['sucess'] !== undefined) { alert('registered') 
-            document.getElementById('a415').click()
-            }
+            fetch('/api/Signup', option).then(ret => { return ret.json() }).then(ret => {
+                if (ret['sucess'] !== undefined) {
+                    alert('registered')
+                    this.setState({
+                        newEmail: '',
+                        newPassword: '',
+                        newRePass: "",
+                        newUserName: "",
+                        TermsAgreed: "",
+
+                        Validation: false,
+                    })
+                    this.props.setShow(0);
+                }
                 else {
                     alert(ret['alert'])
                 }
-                
+
             })
         }
 
@@ -75,86 +89,64 @@ class SignupPage extends Component {
 
 
         return (
+            <>
+                <Modal show={true} onHide={() => { this.props.setShow(0) }} >
 
-            <div class="modal fade" id="SignupModal" tabIndex="-1" role="dialog" aria-labelledby="SignupModalLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="SignupModalLabel">Modal title</h5>
-                            <button type="button" id='a415' class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Login</Modal.Title>
+                    </Modal.Header>
+
+                    <Modal.Body>
+                        <div className="row p-5" >
+                            <div className="col-lg-6 " style={{ textAlign: 'center' }}><img src={image} /></div>
+                            <div className=" offset-lg-1 col-lg-5 mt-3 ">
+                                <Form>
+                                    <Form.Group controlId="formBasicEmail">
+                                        <Form.Label>Email address</Form.Label>
+                                        <Form.Control type="email" placeholder="Enter email" value={this.state.newEmail} id='your_name' onChange={this.newEmailHandler} />
+                                    </Form.Group>
+
+                                    <Form.Group controlId="formBasicPassword">
+                                        <Form.Label>UserName</Form.Label>
+                                        <Form.Control type="text" placeholder="It will be visible to all" name="username" value={this.state.newUserName} onChange={this.newUserNameHandler} />
+                                    </Form.Group>
+
+
+                                    <Form.Group controlId="formBasicPassword">
+                                        <Form.Label>Password</Form.Label>
+                                        <Form.Control type="password" placeholder="Password" name="password" value={this.state.newPassword} onChange={this.newPasswordHandler} />
+                                    </Form.Group>
+
+                                    <Form.Group controlId="formBasicPassword">
+                                        <Form.Label>Confirm Password</Form.Label>
+                                        <Form.Control type="password" placeholder="Confirm password" value={this.state.newRePass} onChange={this.newRePassHandler} />
+                                    </Form.Group>
+
+                                    <Form.Group controlId="formBasicCheckbox">
+                                        <Form.Check type="checkbox" label="Accept Terms and Conditions" value={this.state.TermsAgreed} onChange={this.TermsHandler} />
+                                    </Form.Group>
+                                    <Button variant="warning" type="submit" onClick={this.formSubmitHandler}>
+                                        <strong>Submit</strong>
+                                        {this.state.Logging ?
+                                            <Spinner animation="border" role="status" size='sm' style={{ margin: "0 0 0 6px  " }} /> : <></>
+                                        }
+                                    </Button>
+                                </Form>
+                            </div>
                         </div>
-                        <div class="modal-body">
-                        </div>
-                        <div className="main" style={{ background: 'none', paddingTop: '50px', paddingBottom: '50px' }}>
-                            <section className="signup" style={{ marginBottom: "50px" }}>
-                                <div className="container">
+                    </Modal.Body>
 
-                                    <div className="signup-content">
-                                        <div className="signup-form">
-                                            <h2 className="form-title">Sign up</h2>
+                    <Modal.Footer>
+                        <Button variant="secondary"><FontAwesomeIcon icon={faFacebook} size="lg" /> <FontAwesomeIcon icon={faGoogle} size="lg" />  Signup/Login</Button>
+                        <Button variant="primary" onClick={() => { this.props.setShow(1) }}>Login</Button>
+                    </Modal.Footer>
 
-                                            <form method="POST" onSubmit={this.formSubmitHandler} className="register-form" id="register-form">
-                                                {alert.message &&
-                                                    <div className={`alert ${alert.type}`}>{alert.message}</div>
-                                                }
+                </Modal>
 
-
-                                                <div className="form-group">
-                                                    <input type="text" className="form-control" required="required" name="username" id="username" value={this.state.newUserName} onChange={(e) => this.newUserNameHandler(e.target.value)}
-                                                        placeholder="Your Name" />
-                                                </div>
-                                                <div className="form-group">
-                                                    <input type="email" className="form-control" name="email" required="required" id="email" value={this.state.newEmail} onChange={(e) => this.newEmailHandler(e.target.value)}
-                                                        placeholder="Your Email" />
-                                                </div>
-
-
-                                                <div className="form-group">
-                                                    <input type="password" className="form-control" autoComplete="off" value={this.state.newPassword} onChange={(e) => this.newPasswordHandler(e.target.value)} name="password"
-                                                        id="password" placeholder="Password" />
-
-                                                </div>
-                                                <div className="form-group">
-                                                    <div >
-                                                        <input type="password" value={this.state.newRePass} onChange={(e) => this.newRePassHandler(e.target.value)} autoComplete="off" id="re_pass" className="form-control"
-                                                            placeholder="Repeat your password" />
-                                                        <img id="re-pass-error" className="re-pass-error"
-                                                            src="webfonts\re-pass-error.svg" alt="file not found" />
-                                                    </div>
-                                                </div>
-
-                                                <div className="form-group d-flex align-items-center">
-                                                    <input type="checkbox" required name="agree-term" id="agree-term" checked={this.state.TermsAgreed} onClick={this.TermsHandler} />
-                                                    <a href="/#" className="term-service">Terms of service</a>
-                                                </div>
-                                                <div className="form-group form-button justify-content-center align-items-center" style={{ display: 'flex' }}>
-                                                    <button type='submit' name="signup" id="signup"
-                                                        className="form-submit-disabled"  >Submit</button>
-                                                    <div className="spinner-border" style={{ marginLeft: '36px', marginTop: '23px', display: this.state.Validation ? "block" : "none" }} role="status">
-                                                        <span className="sr-only">Validating...</span>
-                                                    </div>
-
-                                                </div>
-                                            </form>
-
-                                        </div>
-                                        <div className="signup-image">
-                                            <figure><img src="images/signup/signup-image.jpg" alt="not file ot upload" /></figure>
-                                            <a id="link-to-login" className="signup-image-link" href="/login">I am already member</a>
-                                        </div>
-
-                                    </div>
-                                </div>
-                            </section>
-                        </div >
-                    </div>
-                </div>
-            </div>
+            </>
         )
     }
 }
 
-export default SignupPage ;
+export default SignupPage;
 

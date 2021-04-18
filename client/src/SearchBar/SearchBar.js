@@ -1,5 +1,10 @@
 import React, { Component } from 'react'
+import { Form, InputGroup, FormControl, Button } from 'react-bootstrap'
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+    faSearch
+} from "@fortawesome/free-solid-svg-icons";
 class SearchBar extends Component {
     constructor(props) {
         super(props)
@@ -8,37 +13,65 @@ class SearchBar extends Component {
         }
         this.bookHintHandler = this.bookHintHandler.bind(this)
     }
-
     bookHintHandler(bName) {
-        fetch( '/api/bookHint?title=' + bName).then(ret => { return ret.json() }).then(ret => {
-
+        fetch('/api/bookHint?title=' + bName).then(ret => { return ret.json() }).then(ret => {
             this.setState({ bookHintList: ret['data'] })
         })
     }
+
+
     render() {
         return (
-            <section className="search_bar p-5 m-5 " >
-                <div>
-                    <div className="choices__inner">
-                        <div className="input-search-div" >
-                            <input style={{ margin: 'auto' }} type="text" name="title" id="search-book-title" list="data" className="searchTerm" value={this.props.bookName} onChange={(e) => { this.bookHintHandler(e.target.value); this.props.bookNameHandler(e.target.value); }} autoComplete="off" placeholder="Type your Book name here?" />
-                            <a style={{ marginLeft: ' 10px' }} onClick={() => { this.props.indexhandler(0); }} href="/#" >
-                                <i id="book_search-button" className="fab fa-searchengin fa-2x"></i></a>
+            <div className="mt-5">
+                <div className="row" >
+                    <div className="col-lg-6 offset-lg-2 ">
+                        {/* <input style={{ margin: 'auto' }} type="text" name="title" id="search-book-title" list="data" className="searchTerm" value={this.props.bookName} onChange={(e) => { this.bookHintHandler(e.target.value); this.props.bookNameHandler(e.target.value); }} autoComplete="off" placeholder="Type your Book name here?" /> */}
+
+                        <InputGroup className="m-1">
+                            <FormControl
+                                placeholder="Book title"
+                                aria-label="Recipient's username"
+                                aria-describedby="basic-addon2"
+                                list="data"
+                                value={this.props.bookName}
+                                onChange={(e) => { this.bookHintHandler(e.target.value); this.props.bookNameHandler(e.target.value); }}
+                                autoComplete="off"
+                            />
                             <datalist id="data">
                                 {
                                     this.state.bookHintList.map((item, key) =>
                                         <option key={key} value={item} />
                                     )}
                             </datalist>
-                        </div>
+                            <InputGroup.Append  >
+                                <Button style={{
+                                    color: "#212529",
+                                    backgroundColor: "#ffc107",
+                                    borderColor: "#ffc107",
+                                }} variant="outline-secondary" onClick={() => { this.props.indexhandler(0); }}>
+                                    <FontAwesomeIcon icon={faSearch} size="lg"
+                                        style={{
+                                            color: "#212529",
+                                            backgroundColor: "#ffc107",
+                                            borderColor: "#ffc107",
+                                        }} />
+                                </Button>
+                            </InputGroup.Append>
+                        </InputGroup>
 
-                        <button type="button" className="btn btn-outline-dark btn-lg btn-radius advbtn" id="advance-button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample"
-                            style={{ margin: 'auto' }} >advance search</button>
-                        <button type="button" onClick={this.props.availibilityHandler} className="btn btn-outline-dark btn-lg btn-radius advbtn" id="advance-button"
-                            style={{ margin: 'auto' }} >Only Available</button>
                     </div>
-                </div>
-            </section >
+                    <div className="col-lg-4 ">
+                        <div className="m-lg-2" style={{ display: 'flex', justifyContent: 'center' }}>
+                            <Button id="advance-button" className="mr-1" variant="warning" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample"
+                                onClick={() => { this.props.setAdvanceTab(!this.props.advanceTab) }} ><strong>Advance search</strong></Button>
+
+                            <Button id="advance-button" variant="warning" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample"
+                                onClick={this.props.availibilityHandler}  ><strong>Only Available</strong></Button>
+                        </div>
+                    </div>
+
+                </div >
+            </div>
 
         )
     }

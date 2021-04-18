@@ -1,72 +1,83 @@
-import React, { Component } from 'react';
-import logo from '../_images/logo.png'
-import './nav.css'
 
-class header extends Component {
-    constructor(props) {
-        super(props);
-        this.logoutHandler = this.logoutHandler.bind(this)
-        this.loginLogoutLink = this.loginLogoutLink.bind(this)
-        this.renderProfile = this.renderProfile.bind(this)
-    }
+import React, { useState, useEffect } from 'react'
+import logo from "../_images/logo.png";
+import { Dropdown, Nav, Navbar } from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import LoginPage from '../LoginPage/LoginPage'
+import SignupPage from '../SignupPage/SignUp'
+import {
+  faIdBadge,
+  faUserCircle,
+  faSignOutAlt,
+  faHome,
+
+} from "@fortawesome/free-solid-svg-icons";
+import BookEntryPage from '../BookEntry/BookEntryPage';
+import { Link } from 'react-router-dom';
 
 
-    logoutHandler() {
-        fetch("/api/Logout").then(ret => { return ret.json() }).then(ret => {
-
-            if (ret['sucess'] !== undefined) {
-                localStorage.removeItem('authToken')
-                this.props.checkLogged()
-                console.log('1 code executed')
-            }
-        }).catch(err => {
-            alert("problem in logout activity")
-        })
-    }
-
-    loginLogoutLink() {
-        if (this.props.isLogged === false) {
-            return <div><button type="button" id="btnSignupModal" class="btn btn-primary" data-toggle="modal" data-target="#SignupModal">Singup</button>
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#LoginModal"><i className="fas fa-sign-out-alt dropdown-list-item"></i>Login</button></div>;
+export default function Header(props) {
+  const logoutHandler = () => {
+    fetch("/api/Logout")
+      .then((ret) => {
+        return ret.json();
+      })
+      .then((ret) => {
+        if (ret["sucess"] !== undefined) {
+          localStorage.removeItem("authToken");
+          props.checkLogged();
         }
-        else
-            return <a href="/#" onClick={this.logoutHandler} > <i className="fas fa-sign-out-alt dropdown-list-item"></i>logout</a>
-    }
-    renderProfile() {
-        if (this.props.isLogged === true) {
-            return <a href={'/profile'}><i className="fas fa-id-badge dropdown-list-item "></i>Profile</a>;
-        }
-        else return <div style={{ 'display': 'none' }}></div>
-    }
-    componentDidMount() {
-        this.setState({ route: this.props.env })
-    }
-    render() {
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+  const [showLogin, setLoginShow] = useState(0);
 
-        return (
-            <nav className="navbar navbar-expand-lg navbar-light bg-light">
-                <a href="/#"  to={'/'}> <img className="nav-logo-img" alt="file never uploaded" src={logo} style={{ width: '316px' }} /></a>
+  return (
 
-                <div className="dropdown">
-                    <button className="dropbtn " ><i style={{ color: 'black' }} className="fas fa-user-circle fa-2x ml-0"></i>
-                    </button>
-                    <div className="dropdown-content">
-                        {this.loginLogoutLink()}
-                        <a href={'/'}><i className="fas fa-home dropdown-list-item"></i>Home</a>
+    <>
+      {showLogin == 1 ? <LoginPage isLogged={props.isLogged} setLogged={props.setLogged} setShow={setLoginShow} setUser={props.setUser} /> : <></>}
+      {showLogin == 2 ? <SignupPage isLogged={props.isLogged} setShow={setLoginShow} /> : <></>}
+      {showLogin == 3 ? <BookEntryPage isLogged={props.isLogged} setShow={setLoginShow} user={props.user} /> : <></>}
 
-                        {this.renderProfile()}
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#bookEntryModal"><i className="fas fa-sign-out-alt dropdown-list-item"></i>Donae</button>
+      <Navbar bg="light" variant="light">
+        <Navbar.Brand as={Link} to={"/"}>
 
-                    </div>
-                </div>
-            </nav>
-        )
-
-    }
+          <img
+            className="nav-logo-img"
+            alt="file never uploaded"
+            src={logo}
+            style={{ width: "316px" }}
+          />
+        </Navbar.Brand>
+        <Nav className="mr-auto"></Nav>
+        <Dropdown className="">
+          <Dropdown.Toggle variant="warning" id="dropdown-basic">
+            <FontAwesomeIcon icon={faUserCircle} size="lg" />
+          </Dropdown.Toggle>
+          <Dropdown.Menu style={{ left: "-188%" , top: "117%" }}>
+            <Dropdown.Item as={Link} to={'/'}>
+              <FontAwesomeIcon icon={faHome} size="lg" className="mr-2" />
+                Home
+            </Dropdown.Item>
+            {!props.isLogged ? (
+              <Dropdown.Item onClick={() => { setLoginShow(1) }}><FontAwesomeIcon icon={faSignOutAlt} size="lg" className="mr-2" />Signup/Login</Dropdown.Item>
+            ) : (
+              <Dropdown.Item onClick={logoutHandler}>
+                <FontAwesomeIcon icon={faSignOutAlt} size="lg" className="mr-2" />
+                Logout
+              </Dropdown.Item>
+            )}
+            <Dropdown.Item onClick={() => { setLoginShow(3) }}>
+              <FontAwesomeIcon icon={faSignOutAlt} size="lg" className="mr-2" />Donate</Dropdown.Item>
+            {props.isLogged ?
+              <Dropdown.Item as={Link} to={'/profile'} >
+                <FontAwesomeIcon icon={faIdBadge} size="lg" className="mr-2" />Profile</Dropdown.Item>
+              : <></>}
+          </Dropdown.Menu>
+        </Dropdown>
+      </Navbar>
+    </>
+  );
 }
-
-
-
-
-export default header
-// export default header

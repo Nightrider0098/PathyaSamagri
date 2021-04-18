@@ -85,14 +85,11 @@ function getBooksHints(name, userId) {
 
 function getBooksAdvance(index, userId, filter) {
     return dispatch => {
-        filter.set('index', index*12)
-        dispatch(request( index, filter ));
-
+        filter['index'] = index * 12;
+        dispatch(request(index, filter));
         bookServices.bookAdvance(index, userId, filter).then(
             booksDetails => {
-                
                 dispatch(success(booksDetails['book_find']));
-
             },
             error => {
                 dispatch(failure(error));
@@ -101,7 +98,7 @@ function getBooksAdvance(index, userId, filter) {
         );
     };
 
-    function request(index, filter) { return { type: bookConstants.BOOK_FIND_ADVANCE_REQUEST, index: index, filter: filter,isAdvance: 1 } }
+    function request(index, filter) { return { type: bookConstants.BOOK_FIND_ADVANCE_REQUEST, index: index, filter: filter, isAdvance: 1 } }
     function success(booksDetails) { return { type: bookConstants.BOOK_FIND_ADVANCE_SUCCESS, bookDetails: booksDetails } }
     function failure(error) { return { type: bookConstants.BOOK_FIND_ADVANCE_FAILED, error } }
 
@@ -112,12 +109,12 @@ function setQuery(query) {
 }
 
 
-function getUserBooks(name="", userBookIndex,userID) {
+function getUserBooks(name = "", userBookIndex, userID) {
 
     return dispatch => {
-        
+
         dispatch(querySetting(userBookIndex))
-        bookServices.userBookFind(name, userBookIndex,"")
+        bookServices.userBookFind(name, userBookIndex, "")
             .then(
                 bookDetails => {
                     dispatch(success(bookDetails['user_books']));
@@ -138,12 +135,12 @@ function getUserBooks(name="", userBookIndex,userID) {
 }
 
 
-function getUserIssuedBooks(name="", userBookIndex,userID) {
+function getUserIssuedBooks(name = "", userBookIndex, userID) {
 
     return dispatch => {
-        
+
         dispatch(querySetting(userBookIndex))
-        bookServices.userBookIssuedFind(name, userBookIndex,"")
+        bookServices.userBookIssuedFind(name, userBookIndex, "")
             .then(
                 bookDetails => {
                     dispatch(success(bookDetails['issued_books']));

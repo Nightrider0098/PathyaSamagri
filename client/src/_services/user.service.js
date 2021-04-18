@@ -15,7 +15,6 @@ function login(username, password) {
     };
 
     return fetch(`/api/authentication`, requestOptions)
-        .then(handleLoginResponse)
         .then(function (response) {
             return response.json()
         })
@@ -32,15 +31,15 @@ function checkConection() {
     const requestOptions = {
         method: 'GET',
         type: 'cors',
-        headers:  authHeader()
+        headers: authHeader()
     };
     // console.log(document.cookie)
-    return fetch(`/api/refresh`,requestOptions)
+    return fetch(`/api/refresh`, requestOptions)
         .then(function (response) {
             return response.json()
         })
         .then(user => {
-           return user
+            return user
         })
 }
 

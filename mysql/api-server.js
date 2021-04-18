@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-
-var bodyParser = require('body-parser');
+const passport = require('passport')
+const LocalStrategy = require('passport-local').Strategy;
 const express = require("express");
 const con = require("./mysql-connection");
 const Router = express.Router();
@@ -9,34 +9,75 @@ const formidable = require('formidable');
 const uuidv1 = require("uuid/v1");
 const jwt = require('jsonwebtoken');
 
-Router.use(bodyParser.urlencoded({ extended: true }));
-Router.use(bodyParser.json());
 const multer = require('multer')
 var upload = multer({ dest: path.join(__dirname, 'Public', 'images', 'books') })
 var cpUpload = upload.fields([{ name: 'book_image', maxCount: 8 }])
 
-// users hardcoded for simplicity, store in a db for production applications
+Router.use(passport.initialize());
+Router.use(passport.session());
+
+passport.use(new LocalStrategy(
+    function (username, password, done) {
+        console.log('go for authentication')
+        con.query(`SELECT * FROM user where (username ="${username}" and password="${password}") or (email ="${username}" and 	password="${password}")`, (err, result, fields) => {
+            if (err) {
+                return done(err);
+            }
+            if (result.length == 0) {
+                return done(null, false, { message: 'Incorrect username.' });
+            }
+            else {
+                const { password, ...UserWithoutPassword } = result[0]
+                return done(null, UserWithoutPassword);
+            }
+
+        })
+    })
+);
+
+// for storing in session
+passport.serializeUser(function (user, done) {
+    console.log('called serializer')
+    done(null, user.user_id);
+});
+
+passport.deserializeUser(function (id, done) {
+    console.log('called deserializer')
+    con.query(`SELECT * FROM user where user_id='${id}'`, (err, result, fields) => {
+        if (err) {
+            return done(err);
+        }
+        if (result.length == 0) {
+            return done(null, false, { message: 'Session corrupted.' });
+        }
+        else {
+
+            const { password, ...UserWithoutPassword } = result[0]
+            return done(null, UserWithoutPassword);
+        }
+    })
+});
+
 
 async function authenticate({ username, password }) {
     return new Promise((resolve, reject) => {
-
-
         con.query(`SELECT * FROM user where (username ="${username}" and password="${password}") or (email ="${username}" and 	password="${password}")`, (err, result, fields) => {
             if (err) {
                 console.log("error in handling authentication", err);
-                reject({ 'error': err })
+                reject({ message: err.message })
             }
-            if (result === []) {
+            if (result.length == 0) {
 
                 console.log("failed attempt by user", username);
-                reject({ message: "Account Dont exists or Incorrect password" });
+                reject({ message: "Invalid id or password" });
             }
             else {
+
                 const token = jwt.sign({ sub: result[0]['username'] }, "here is the secreat");
                 const { password, ...UserWithoutPassword } = result[0]
                 con.query(`delete from jwtoken where userID='${result[0].user_id}' ; insert into jwtoken values('${result[0].user_id}','${token}','${Date.now()}')`, (err, result) => {
                     if (err) {
-                        return reject({ 'error': err });
+                        return reject({ message: err.message });
                     }
                     else {
                         return resolve({ ...UserWithoutPassword, token: token });
@@ -51,7 +92,6 @@ async function authenticate({ username, password }) {
 
 
 function isAuthenticated(req, res, next) {
-    console.log('checked')
     if (req.headers.authorization !== undefined) {
         con.query(`select * from jwtoken where data='${req.headers.authorization.split(" ")[0]}'`, (err, result) => {
 
@@ -105,7 +145,9 @@ function UserDetails(userId) {
 }
 
 
-
+Router.post('/doubleAuth', passport.authenticate('local'), (req, res, done) => {
+    res.send("authenticated")
+})
 
 
 //to show books with bookname 
@@ -230,13 +272,15 @@ Router.get("/recent_books/", (req, res) => {
 });
 
 //once the book is booked
-Router.post("/authentication", (req, res, next) => {
+Router.post("/authentication", passport.authenticate('local'), (req, res, next) => {
     authenticate({ username: req.body.username, password: req.body.password }).then((AllDetails) => {
         res.send({ ...AllDetails })
 
     }).catch(err => {
         console.log(err)
-        res.sendStatus(400)
+        res.status(400)
+
+        res.send(err.message)
 
     })
 
@@ -277,10 +321,11 @@ Router.get('/isLogged', (req, res) => {
 Router.post("/Signup", (req, res, next) => {
     con.query(`SELECT * FROM user where username ="${req.body.username}" or email="${req.body.email}"`, (err, result, fields) => {
         if (err) next(err);
-        if (result.length !== 0)
-            {console.log('User alerady exits '+ req.body.username)
+        if (result.length !== 0) {
+            console.log('User alerady exits ' + req.body.username)
 
-        res.json({ 'alert': 'Failed memeber already exits' })}
+            res.json({ 'alert': 'Failed memeber already exits' })
+        }
         else {
 
             con.query(`INSERT into user ( user_id,username,email,password) values("${uuidv1()}","${req.body.username}","${req.body.email}","${req.body.password}")`, (err, result, fields) => {
@@ -290,7 +335,7 @@ Router.post("/Signup", (req, res, next) => {
                 } else {
                     console.log("new account created by ", req.body.username);
                     // res.sendStatus(200)
-                    res.json({'sucess':'account sucessfully created'})
+                    res.json({ 'sucess': 'account sucessfully created' })
                 }
             });
         }
@@ -338,6 +383,7 @@ Router.get("/notification", isAuthenticated, (req, res) => {
 //address and phone no and other data
 Router.post("/update_user/", (req, res) => {
     var form2 = new formidable.IncomingForm();
+
     form2.uploadDir = path.resolve(__dirname, "..", "Public", "images", "user");
     form2.parse(req, function (err, fields, files) {
         function imgEXT(file_object) {
@@ -348,15 +394,17 @@ Router.post("/update_user/", (req, res) => {
         }
 
         if (files['file'] !== undefined) {
-            var file_name = files['file'].path.split("\\")[files['file'].path.split("\\").length - 1] + imgEXT(files['file']);
-            fs.rename(files['file']['path'], path.join(__dirname, "..", "public", "images", "user", file_name), (err) => {
+            var file_name = files['file'].path + imgEXT(files['file']);
+            fs.rename(files['file']['path'], file_name, (err) => {
                 if (err) console.log("file not saved", err);
             });
-            sql = "update user set address='" + fields['address'] + "' ,phone_no = '" + fields['phone_no'] + "',prof_img_id = '" + file_name + "' where user_id='" + fields['user_id'] + "'";
+
+            sql = "update user set address='" + fields['address'] + "' ,phone_no = '" + fields['phone_no'] + "',prof_img_id = '" + file_name.split('/')[file_name.split('/').length - 1] + "' where user_id='" + fields['user_id'] + "'";
             con.query(sql, (err, result) => {
-                console.log(sql, "here is the query")
+
+                res.send("ok")
+                console.log(sql, "here is the query", err)
             });
-            res.send("ok")
         } else {
             sql = "update user set address='" + fields['address'] + "' ,phone_no = '" + fields['phone_no'] + "' where user_id='" + fields['user_id'] + "'";
             con.query(sql, (err, result) => {
@@ -373,43 +421,40 @@ Router.post("/update_user/", (req, res) => {
 
 Router.post("/advance_search", (req, res) => {
 
-    var form2 = new formidable.IncomingForm();
+    const AllDetails = req.body;
+    console.log(AllDetails)
+    var sql = 'select * from book where ';
+    if (AllDetails['donation_from'] === "")
+        sql += "donated_on <= current_time() "
+    else
+        sql += `donated_on >= "${AllDetails['donation_from']}" `
 
-    form2.parse(req, function (err, fields, files) {
-        const AllDetails = fields;
-        var sql = 'select * from book where ';
-        var all_options = Object.keys(AllDetails);
-        if (AllDetails['donation_from'] === "")
-            sql += "donated_on <= current_time() "
-        else
-            sql += `donated_on >= "'${AllDetails['donation_from']}'" `
-
-        if (AllDetails['book_title'] !== '')
-            sql += ` and title like "%${AllDetails['book_title']}%"`;
-        sql += `and edition >= ${AllDetails['lower']} and edition < ${AllDetails['upper']} `;
-        if (AllDetails['owner'])
-            sql += `and owner_id like '%${AllDetails['owner']}%' `;
-        if (AllDetails['publisher'])
-            sql += `and publisher like "%${AllDetails['publisher']}%"`;
-        if (AllDetails['subject'])
-            sql += `and subject = "${AllDetails['subject']}" `
-        if (AllDetails['available_now']) {
-            if (AllDetails['available_now'] === "availible")
-                sql += 'and available_now = 1';
-            else if (AllDetails['available_now'] === "not availible")
-                sql += 'and available_now = 0'
-        }
-        sql = sql + " limit " + AllDetails['index'] + ",12"
-        con.query(sql, (err, result, fields) => {
-            res.json({
-                "book_find": result
-            });
-            // console.log(sql, AllDetails, req.params, req.query);
-
+    if (AllDetails['book_title'] !== '')
+        sql += ` and title like "%${AllDetails['book_title']}%"`;
+    sql += `and edition >= ${AllDetails['lower']} and edition < ${AllDetails['upper']} `;
+    if (AllDetails['owner'])
+        sql += `and owner_id like '%${AllDetails['owner']}%' `;
+    if (AllDetails['publisher'])
+        sql += `and publisher like "%${AllDetails['publisher']}%"`;
+    if (AllDetails['subject'])
+        sql += `and subject = "${AllDetails['subject']}" `
+    if (AllDetails['available_now']) {
+        if (AllDetails['available_now'] === "availible")
+            sql += 'and available_now = 1';
+        else if (AllDetails['available_now'] === "not availible")
+            sql += 'and available_now = 0'
+    }
+    sql = sql + " limit " + AllDetails['index'] + ",12"
+    console.log(sql)
+    con.query(sql, (err, result, fields) => {
+        res.json({
+            "book_find": result
         });
+        // console.log(sql, AllDetails, req.params, req.query);
 
     });
-})
+
+});
 
 Router.use('/book_entry', cpUpload, (req, res, next) => {
     ;
@@ -428,6 +473,7 @@ Router.use('/book_entry', cpUpload, (req, res, next) => {
     var bUserID = req.body['user_id'] || undefined
     var bFor_year = req.body['for_year']
     var sql = "insert into book values('" + req.body['subject'] + String(index) + "','" + bTitle + "','" + bAuthor + "','" + bPublisher + "'," + bEdition + ",'" + bUserID + "','" + (new Date().toISOString().slice(0, 19).replace('T', ' ')) + "',1,'" + bFor_year + "','" + bSubject + "',NULL,'" + file_name + "',0," + bPrice + ")";
+    console.log(sql)
     con.query(sql, (error, result) => {
         if (error) {
             console.log(error);
@@ -735,9 +781,10 @@ Router.get("/book_booked/", isAuthenticated, (req, res) => {
 })
 
 Router.get("/user_books/", (req, res) => {
-    console.log("request for USer Books")
-    UserId(req.headers.authorization.split(" ")[1]).then(user_id => {
+    if (req.user) {
+        let user_id = req.query.user_Id;
         sql = `SELECT * FROM book  where owner_id = '${user_id}' order by donated_on desc limit ${req.query['index']},12 `;
+        console.log(sql, 'user_book')
         con.query(sql, (err, result, fields) => {
             if (err) console.log(err);
 
@@ -746,8 +793,11 @@ Router.get("/user_books/", (req, res) => {
             });
 
         });
-
-    });
+    }
+    else {
+        res.status(400)
+        res.send('First Login')
+    }
 })
 
 Router.get("/usersDetails", isAuthenticated, (req, res) => {

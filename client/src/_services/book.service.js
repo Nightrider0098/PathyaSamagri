@@ -28,8 +28,6 @@ function bookIssue(bookId, userId) {
             });
 }
 
-
-
 function bookRecent(name, index, userId) {
     const requestOptions = {
         method:
@@ -61,7 +59,6 @@ function bookRecent(name, index, userId) {
                 alert(error.message)
             });
 }
-
 
 function bookFind(name, index, userId) {
     const requestOptions = {
@@ -184,33 +181,12 @@ function bookHint(name, userId) {
             });
 }
 
-function bookAdvance(index, userId, frm) {
-    return new Promise((resolve, reject) => {
-        var request = new XMLHttpRequest();
-        request.onreadystatechange = function () {
-            if (this.readyState === 4 & this.status === 200) {
-
-                if (!this.response.ok) {
-
-                    resolve(request.response)
-                }
-                else reject("failed to get response")
-
-
-
-            }
-        };
-        request.open("POST", "/api/advance_search/", true);
-
-        request.send(frm);
-
-
-    }).then((result) => {
-
-        return JSON.parse(result)
-    })
-
-
+function bookAdvance(index, userId, data) {
+    const data2 = new URLSearchParams();
+    for (const a in Object.keys(data)) {
+        data2.append(Object.keys(data)[a], data[Object.keys(data)[a]]);
+    }
+    return fetch('/api/advance_search', { method: 'POST', body: data2 }).then(res => res.json())
 }
 
 function handleResponse(response) {

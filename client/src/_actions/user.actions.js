@@ -22,7 +22,6 @@ function login(username, password) {
             return "sucesss"
         }).catch(error => {
             dispatch(failure(error));
-            console.log(error)
         }
         );
     };

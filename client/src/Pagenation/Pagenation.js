@@ -12,27 +12,27 @@ export default class Paginations extends Component {
         let selected = data.selected;
         selected = Math.ceil(selected);
         this.props.indexHandler(selected);
-        
-
     };
 
 
     render() {
         return (
-            <div id="react-paginate">
-                <ReactPaginate
-                    previousLabel={'< Previous'}
-                    nextLabel={'Next >'}
-                    breakLabel={'...'}
-                    breakClassName={'break-me'}
-                    pageCount={this.props.pageCount}
-                    marginPagesDisplayed={2}
-                    pageRangeDisplayed={5}
-                    onPageChange={this.handlePageClick}
-                    containerClassName={'pagination'}
-                    subContainerClassName={'pages pagination'}
-                    activeClassName={'active'}
-                /></div>
+            <div style={{ textAlign: 'center' }}>
+                <div id="react-paginate" style={{ display: "inline-block" }}>
+                    <ReactPaginate
+                        previousLabel={'<< Previous'}
+                        nextLabel={'Next >>'}
+                        breakLabel={'...'}
+                        breakClassName={'break-me'}
+                        pageCount={this.props.pageCount}
+                        marginPagesDisplayed={2}
+                        pageRangeDisplayed={5}
+                        onPageChange={this.handlePageClick}
+                        containerClassName={'pagination'}
+                        subContainerClassName={'pages pagination'}
+                        activeClassName={'active'}
+                    /></div>
+            </div>
         );
     }
 }

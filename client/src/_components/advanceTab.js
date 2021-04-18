@@ -1,11 +1,8 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux';
-// import './_advance/style.css'
-import './_advance/doublesidebar.css'
-import './_advance/imported_css.css'
-import './_advance/main.css'
-import './_advance/style.css'
-import './_advance/util.css'
+// import { DoubleRangeSlider } from '../_components/_advance/doubleSlider'
+import { Form, Button, Row, Col } from 'react-bootstrap'
+
 import { bookActions } from '../_actions'
 class AdvanceTab extends Component {
     constructor(props) {
@@ -14,7 +11,7 @@ class AdvanceTab extends Component {
         this.state = {
             book_title: "",
             donation_from: "",
-            available_now: "",
+            available_now: "availible",
             owner: "",
             subject: "",
             lower: '1',
@@ -38,7 +35,9 @@ class AdvanceTab extends Component {
     // 
 
     submit(e) {
+        console.log(this.props)
         e.preventDefault()
+
         let frm = new FormData();
         frm.append("book_title", this.state.book_title);
         frm.append("donation_from", this.state.donation_from);
@@ -48,120 +47,93 @@ class AdvanceTab extends Component {
         frm.append('lower', this.state.lower);
         frm.append('upper', this.state.upper);
         frm.append('publisher', this.state.publisher);
-        frm.append('index',0);
+        frm.append('index', 0);
         const { dispatch } = this.props
-        dispatch(bookActions.getBooksAdvance(0, this.props.user.user_id, frm))
+        dispatch(bookActions.getBooksAdvance(0, "", this.state))
 
+    }
+    componentDidUpdate() {
+        console.log(this.state)
     }
     render() {
         return (
-            <div className="collapse" id="collapseExample">
-                <div className="main " style={{ padding: "20px", marginTop: "50px", backgroundColor: "#8083c9" }} >
-                    <div className="sign-in" style={{ padding: "0px" }}>
-                        <div className="container" style={{ padding: "0px" }}>
-                            <div className="signin-content" style={{ paddingTop: "20px" }}>
-                                <form id='frm-book-data' style={{ width: "90%" }}>
+            <>
+                <div className="p-5 m-5 rounded" style={{
+                    backgroundColor: "white", display: this.props.advanceTab ? "none" : "block"
+                }} >
+                    <h4 className="mb-3" style={{ textAlign: "center" }}>Advance Search</h4>
+                    <Form>
+                        < Form.Group as={Row} controlId="formBasicEmail">
+                            <Form.Label column sm="2" >Title</Form.Label>
+                            <Col sm="10">
+                                <Form.Control name="book_title" type="text" placeholder="Name of the book like." value={this.state.book_title} onChange={this.handleInputChange} />
+                            </Col>
+                        </Form.Group>
+
+                        < Form.Group as={Row} controlId="formBasicEmail">
+                            <Form.Label column sm="2" >Donation From</Form.Label>
+                            <Col sm="10">
+                                <Form.Control type="date" value={this.state.donation_from} onChange={this.handleInputChange} name="donation_from" placeholder="Book donated after." />
+                            </Col>
+                        </Form.Group>
 
 
-                                    <div className="indiv-data-holder ">
-                                        <label className="container-label">
-                                            <input type="checkbox" />
-                                            <span className="checkmark"></span>
-                                        </label>
-                                        <p className="keys-text">Book Title like</p>
-                                        <input className="text-input" name="book_title" value={this.state.book_title} onChange={this.handleInputChange} type='text' />
-                                    </div>
-
-                                    <div className="indiv-data-holder ">
-                                        <label className="container-label">
-                                            <input type="checkbox" />
-                                            <span className="checkmark"></span>
-                                        </label>
-                                        <p className="keys-text">donation_from</p>
-                                        <input className="text-input" name="donation_from" value={this.state.donation_from} onChange={this.handleInputChange} type='date' data-date-inline-picker="true" />
-                                    </div>
-
-
-                                    <div className="indiv-data-holder ">
-                                        <label className="container-label">
-                                            <input type="checkbox" />
-                                            <span className="checkmark"></span>
-                                        </label>
-                                        <p className="keys-text">Availibility</p>
-                                        <input className="text-input" value={this.state.available_now} onChange={this.handleInputChange} name="available_now" list="Availibility_option" />
-                                        <datalist id="Availibility_option" >
-                                            <option value="availible" defaultValue />
-                                            <option value="not availible" />
-                                            <option value="Both" />
-                                        </datalist>
-                                    </div>
+                        < Form.Group as={Row} controlId="formBasicEmail">
+                            <Form.Label column sm="2" >Availibility</Form.Label>
+                            <Col sm="10">
+                                <Form.Control as="select" value={this.state.available_now} onChange={this.handleInputChange} name="available_now" >
+                                    <option value="availible">availible</option>
+                                    <option value="not availible">not availible</option>
+                                    <option value="Both">Both</option>
+                                </Form.Control>
+                            </Col>
+                        </Form.Group>
 
 
 
-                                    <div className="indiv-data-holder ">
-                                        <label className="container-label">
-                                            <input type="checkbox" />
-                                            <span className="checkmark"></span>
-                                        </label>
-                                        <p className="keys-text">owner_id</p>
-                                        <input className="text-input" value={this.state.owner} onChange={this.handleInputChange} name="owner" type='text' />
-                                    </div>
+                        < Form.Group as={Row} controlId="formBasicEmail">
+                            <Form.Label column sm="2" >Subject</Form.Label>
+                            <Col sm="10">
+                                <input name="subject" autocomplete="off" className="form-control" value={this.state.subject} onChange={this.handleInputChange} list="subjects" size="5" />
+                                <datalist id="subjects">
+                                    <option value="Computer"></option>
+                                    <option value="Electrical"></option>
+                                    <option value="Electronics"></option>
+                                    <option value="Mechanical"></option>
+                                    <option value="Civil"></option>
 
-                                    <div className="indiv-data-holder ">
-                                        <label className="container-label">
-                                            <input type="checkbox" />
-                                            <span className="checkmark"></span>
-                                        </label>
-                                        <p className="keys-text">subject</p>
-                                        <input name="subject" className="text-input" value={this.state.subject} onChange={this.handleInputChange} list="subjects" size="5" />
-                                        <datalist id="subjects">
-
-                                        </datalist>
-                                    </div>
+                                </datalist>
+                            </Col>
+                        </Form.Group>
 
 
-                                    <div className="indiv-data-holder ">
-                                        <label className="container-label">
-                                            <input type="checkbox" />
-                                            <span className="checkmark"></span>
-                                        </label>
-                                        <p className="keys-text">Lower Limit</p>
-                                        <input type="input" name="lower" value={this.state.lower} tabIndex="0" onChange={this.handleInputChange} max="100" min="0" step="1" />
-                                    </div>
+                        {/* <DoubleRangeSlider ></DoubleRangeSlider> */}
 
 
-                                    <div className="indiv-data-holder ">
-                                        <label className="container-label">
-                                            <input type="checkbox" />
-                                            <span className="checkmark"></span>
-                                        </label>
-                                        <p className="keys-text">Upper Limit</p>
-                                        <input type="input" name="upper" value={this.state.upper} tabIndex="0" onChange={this.handleInputChange} max="100" min="0" step="1" />
-                                    </div>
+                        < Form.Group as={Row} controlId="formBasicEmail">
+                            <Form.Label column sm="2" >Owner Id</Form.Label>
+                            <Col sm="10">
+                                <Form.Control name="owner" type="text" value={this.state.owner} onChange={this.handleInputChange} >
+                                </Form.Control>
+                            </Col>
+                        </Form.Group>
 
 
-
-                                    <div className="indiv-data-holder ">
-                                        <label className="container-label">
-                                            <input type="checkbox" />
-                                            <span className="checkmark"></span>
-                                        </label>
-                                        <p className="keys-text" value={this.state.publisher} style={{ width: '228px', marginLeft: '25px' }}>Publisher</p>
-                                        <input className="text-input" style={{ width: '50%', marginLeft: '130px' }} onChange={this.handleInputChange} name="publisher" type='text' />
-                                    </div>
-
-                                    <div style={{ width: '100%' }}>
-                                        <button className="btn btn-outline-dark btn-lg btn-radius advbtn" type="button" onClick={this.submit}
-                                            style={{ margin: '45px calc(50% - 69px)' }} id="search-book">Find Book</button>
-                                    </div>
-                                </form>
-                            </div>
+                        < Form.Group as={Row} controlId="formBasicEmail">
+                            <Form.Label column sm="2" >Publisher</Form.Label>
+                            <Col sm="10">
+                                <Form.Control type="text" name="publisher" value={this.state.publisher} onChange={this.handleInputChange} >
+                                </Form.Control>
+                            </Col>
+                        </Form.Group>
+                        <div style={{ textAlign: 'center' }}>
+                            <Button variant="warning" type="submit" onClick={this.submit}>Find Book</Button>
                         </div>
-
-
-                    </div>
+                    </Form>
                 </div >
-            </div>
+
+
+            </>
         )
     }
 }
